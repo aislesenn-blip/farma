@@ -11,8 +11,8 @@
     --card-bg: rgba(255, 255, 255, 0.85);
 
     /* Layout */
-    --nav-height: 64px;
-    --sidebar-width: 250px;
+    --nav-height: 80px; /* Increased for mobile touch target */
+    --sidebar-width: 280px;
 
     /* Shadows & Effects */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -41,6 +41,7 @@ body {
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    width: 100%;
 }
 
 /* Glassmorphism utility */
@@ -54,6 +55,7 @@ body {
 .app-container {
     display: flex;
     height: 100vh;
+    width: 100vw;
     overflow: hidden;
 }
 
@@ -191,13 +193,12 @@ body {
     right: 0;
     height: var(--nav-height);
     background: white;
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-around;
     align-items: center;
     z-index: 100;
-    border-top-left-radius: var(--border-radius-lg);
-    border-top-right-radius: var(--border-radius-lg);
+    padding-bottom: env(safe-area-inset-bottom); /* iOS support */
 }
 
 .nav-item {
@@ -205,45 +206,42 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-secondary);
+    color: #94A3B8;
     cursor: pointer;
-    font-size: 1.25rem;
-    padding: 8px;
+    font-size: 1.5rem; /* Larger touch targets, Airbnb style */
+    flex: 1;
+    height: 100%;
     transition: var(--transition-fast);
-    position: relative;
 }
 
 .nav-item.active {
     color: var(--primary-color);
-    transform: translateY(-4px);
 }
 
-.nav-item.active::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    width: 6px;
-    height: 6px;
-    background: var(--primary-color);
-    border-radius: 50%;
+.nav-item-label {
+    font-size: 0.65rem;
+    margin-top: 4px;
+    font-weight: 600;
 }
 
 /* Mobile Extended Menu */
 .mobile-menu {
     position: fixed;
-    bottom: calc(var(--nav-height) + 16px);
-    right: 16px;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background: white;
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-lg);
-    padding: 16px;
-    display: none; /* Hidden initially */
+    border-top-left-radius: var(--border-radius-lg);
+    border-top-right-radius: var(--border-radius-lg);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+    padding: 24px 24px calc(var(--nav-height) + 24px) 24px;
+    display: none;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
     z-index: 99;
-    transform: translateY(20px);
+    transform: translateY(100%);
     opacity: 0;
-    transition: var(--transition-normal);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
 }
 
 .mobile-menu.show {
@@ -255,10 +253,24 @@ body {
 .menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    color: var(--text-secondary);
-    font-weight: 500;
+    gap: 16px;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.25rem;
+    padding: 12px 0;
     cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.menu-item:last-child {
+    border-bottom: none;
+}
+
+.menu-item i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    width: 32px;
+    text-align: center;
 }
 
 /* Shared Utilities */

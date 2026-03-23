@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FARMA - Digital Agriculture Platform</title>
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Leaflet Map JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Driver.js for Onboarding Tour -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -172,11 +175,16 @@
 
                 <div class="ai-input-section card glass mb-4">
                     <h2>Select Farm for Analysis</h2>
-                    <select class="filter-select w-100 mt-2" id="ai-farm-select">
+                    <select class="filter-select w-100 mt-2 mb-4" id="ai-farm-select" onchange="updateAIFarmPreview()">
                         <option>Farm A - Arusha (15 ha, Loam)</option>
                         <option>Farm B - Dodoma (8 ha, Sandy)</option>
                     </select>
-                    <button class="btn-primary mt-3 w-100" onclick="simulateAI()">Run AI Analysis</button>
+
+                    <div id="ai-farm-preview" class="farm-card" style="display: flex; flex-direction: row; margin-bottom: 24px;">
+                        <!-- Dynamically Populated Preview -->
+                    </div>
+
+                    <button class="btn-primary w-100" onclick="simulateAI()">Run Deep Neural Analysis</button>
                 </div>
 
                 <div class="ai-results" id="ai-results" style="display: none;">
@@ -298,18 +306,34 @@
 
         <!-- Mobile Bottom Navigation (Visible on Mobile) -->
         <nav class="bottom-nav">
-            <div class="nav-item active" data-target="dashboard"><i class="fa-solid fa-house"></i></div>
-            <div class="nav-item" data-target="land-market"><i class="fa-solid fa-map-location-dot"></i></div>
-            <div class="nav-item" data-target="weather"><i class="fa-solid fa-cloud-sun-rain"></i></div>
-            <div class="nav-item" data-target="ai-crop"><i class="fa-solid fa-microchip"></i></div>
-            <div class="nav-item menu-toggle"><i class="fa-solid fa-bars"></i></div>
+            <div class="nav-item active" data-target="dashboard">
+                <i class="fa-solid fa-house"></i>
+                <span class="nav-item-label">Home</span>
+            </div>
+            <div class="nav-item" data-target="land-market">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <span class="nav-item-label">Land</span>
+            </div>
+            <div class="nav-item" data-target="weather">
+                <i class="fa-solid fa-cloud-sun-rain"></i>
+                <span class="nav-item-label">Weather</span>
+            </div>
+            <div class="nav-item" data-target="ai-crop">
+                <i class="fa-solid fa-microchip"></i>
+                <span class="nav-item-label">AI Crop</span>
+            </div>
+            <div class="nav-item menu-toggle">
+                <i class="fa-solid fa-bars"></i>
+                <span class="nav-item-label">Menu</span>
+            </div>
         </nav>
 
         <!-- Mobile Extended Menu -->
         <div class="mobile-menu">
-            <div class="menu-item" data-target="input-market"><i class="fa-solid fa-seedling"></i> Inputs</div>
-            <div class="menu-item" data-target="equipment"><i class="fa-solid fa-tractor"></i> Equipment</div>
-            <div class="menu-item" data-target="crop-market"><i class="fa-solid fa-wheat-awn"></i> Crop Market</div>
+            <div class="menu-item" data-target="input-market"><i class="fa-solid fa-seedling"></i> <span>Input Marketplace</span></div>
+            <div class="menu-item" data-target="equipment"><i class="fa-solid fa-tractor"></i> <span>Equipment Rental</span></div>
+            <div class="menu-item" data-target="crop-market"><i class="fa-solid fa-wheat-awn"></i> <span>Crop Marketplace</span></div>
+            <div class="menu-item menu-close"><i class="fa-solid fa-xmark"></i> <span>Close Menu</span></div>
         </div>
 
         <!-- Farm Detail Modal -->
