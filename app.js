@@ -26,28 +26,28 @@ const mockFarms = Array.from({ length: 32 }, (_, i) => {
         water: waters[Math.floor(Math.random() * waters.length)],
         price: Math.floor(Math.random() * 2000) + 500,
         score: Math.floor(Math.random() * 30) + 70,
-        imageQuery: ["farmland", "agriculture", "crops", "farm", "soil", "rural landscape"][i % 6] + " " + (i%3) // Adding i%3 ensures slightly different queries for Unsplash
+        imageQuery: ["farmland field", "rural crop landscape", "farming land", "agricultural field harvest", "soil farming", "green pasture farming"][i % 6] + " " + (i%3) // Highly specific, ensures variety
     };
 });
 
 const mockProducts = [
-    { id: 1, category: "Seeds", name: "Drought-Resistant Maize Seed", supplier: "AgriSeed Co.", price: 45.00, unit: "bag (10kg)", rating: 4.8, imageQuery: "seeds" },
-    { id: 2, category: "Fertilizers", name: "NPK 15-15-15 Premium", supplier: "GrowWell", price: 32.50, unit: "bag (50kg)", rating: 4.5, imageQuery: "fertilizer" },
-    { id: 3, category: "Pesticides", name: "Organic Neem Extract", supplier: "EcoFarming", price: 18.00, unit: "liter", rating: 4.9, imageQuery: "pesticide" },
-    { id: 4, category: "Irrigation", name: "Drip Tape Roll 1000m", supplier: "WaterSmart", price: 120.00, unit: "roll", rating: 4.7, imageQuery: "irrigation" },
-    { id: 5, category: "Seeds", name: "High-Yield Soybean", supplier: "AgriSeed Co.", price: 55.00, unit: "bag (10kg)", rating: 4.6, imageQuery: "soybeans" },
-    { id: 6, category: "Fertilizers", name: "Urea 46% Nitrogen", supplier: "GrowWell", price: 28.00, unit: "bag (50kg)", rating: 4.4, imageQuery: "soil fertilizer" },
-    { id: 7, category: "Seeds", name: "Sunflower Seeds Hybrid", supplier: "SunCo", price: 38.00, unit: "bag (5kg)", rating: 4.7, imageQuery: "sunflower seeds" },
-    { id: 8, category: "Pesticides", name: "Fungicide Spray", supplier: "CropProtect", price: 25.00, unit: "bottle (1L)", rating: 4.2, imageQuery: "crop spray" }
+    { id: 1, category: "Seeds", name: "Drought-Resistant Maize Seed", supplier: "AgriSeed Co.", price: 45.00, unit: "bag (10kg)", rating: 4.8, imageQuery: "corn seeds bag" },
+    { id: 2, category: "Fertilizers", name: "NPK 15-15-15 Premium", supplier: "GrowWell", price: 32.50, unit: "bag (50kg)", rating: 4.5, imageQuery: "fertilizer sack" },
+    { id: 3, category: "Pesticides", name: "Organic Neem Extract", supplier: "EcoFarming", price: 18.00, unit: "liter", rating: 4.9, imageQuery: "pesticide bottle" },
+    { id: 4, category: "Irrigation", name: "Drip Tape Roll 1000m", supplier: "WaterSmart", price: 120.00, unit: "roll", rating: 4.7, imageQuery: "drip irrigation hose" },
+    { id: 5, category: "Seeds", name: "High-Yield Soybean", supplier: "AgriSeed Co.", price: 55.00, unit: "bag (10kg)", rating: 4.6, imageQuery: "soybean crop" },
+    { id: 6, category: "Fertilizers", name: "Urea 46% Nitrogen", supplier: "GrowWell", price: 28.00, unit: "bag (50kg)", rating: 4.4, imageQuery: "nitrogen fertilizer soil" },
+    { id: 7, category: "Seeds", name: "Sunflower Seeds Hybrid", supplier: "SunCo", price: 38.00, unit: "bag (5kg)", rating: 4.7, imageQuery: "sunflower seeds planting" },
+    { id: 8, category: "Pesticides", name: "Fungicide Spray", supplier: "CropProtect", price: 25.00, unit: "bottle (1L)", rating: 4.2, imageQuery: "fungicide spray bottle" }
 ];
 
 const mockEquipment = [
-    { id: 1, category: "Tractors", name: "John Deere 5075E", provider: "KiliTractors Ltd", price: 150, unit: "day", rating: 4.9, imageQuery: "tractor" },
-    { id: 2, category: "Harvesters", name: "Class Dominator 130", provider: "AgriRentals", price: 450, unit: "day", rating: 4.7, imageQuery: "harvester" },
-    { id: 3, category: "Planters", name: "Monosem 4-Row Planter", provider: "FarmTech", price: 80, unit: "day", rating: 4.6, imageQuery: "planter machine" },
-    { id: 4, category: "Tractors", name: "Massey Ferguson 385", provider: "KiliTractors Ltd", price: 130, unit: "day", rating: 4.5, imageQuery: "tractor field" },
-    { id: 5, category: "Irrigation", name: "Mobile Pivot System", provider: "WaterTech", price: 200, unit: "day", rating: 4.8, imageQuery: "pivot irrigation" },
-    { id: 6, category: "Harvesters", name: "New Holland TC5.90", provider: "AgriRentals", price: 500, unit: "day", rating: 4.9, imageQuery: "combine harvester" }
+    { id: 1, category: "Tractors", name: "John Deere 5075E", provider: "KiliTractors Ltd", price: 150, unit: "day", rating: 4.9, imageQuery: "john deere tractor" },
+    { id: 2, category: "Harvesters", name: "Class Dominator 130", provider: "AgriRentals", price: 450, unit: "day", rating: 4.7, imageQuery: "combine harvester machine" },
+    { id: 3, category: "Planters", name: "Monosem 4-Row Planter", provider: "FarmTech", price: 80, unit: "day", rating: 4.6, imageQuery: "tractor pulling planter" },
+    { id: 4, category: "Tractors", name: "Massey Ferguson 385", provider: "KiliTractors Ltd", price: 130, unit: "day", rating: 4.5, imageQuery: "red tractor farm" },
+    { id: 5, category: "Irrigation", name: "Mobile Pivot System", provider: "WaterTech", price: 200, unit: "day", rating: 4.8, imageQuery: "center pivot irrigation" },
+    { id: 6, category: "Harvesters", name: "New Holland TC5.90", provider: "AgriRentals", price: 500, unit: "day", rating: 4.9, imageQuery: "harvesting wheat machine" }
 ];
 
 const mockBuyers = [
@@ -79,12 +79,22 @@ async function fetchImage(query) {
     }
 
     try {
-        const response = await fetch(`https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&client_id=${UNSPLASH_ACCESS_KEY}&orientation=landscape`);
+        // Enforce strict query relevancy by adding a general topic and querying for photos directly rather than truly random
+        // Random endpoint often pulls irrelevant photos if the exact tag isn't heavily saturated
+        const strictQuery = `${query} agriculture farm`.trim();
+        const response = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(strictQuery)}&client_id=${UNSPLASH_ACCESS_KEY}&orientation=landscape&per_page=10`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        const imageUrl = data.urls.regular;
-        imageCache[query] = imageUrl;
-        return imageUrl;
+
+        if (data.results && data.results.length > 0) {
+            // Pick a random image from the top relevant results
+            const randomIndex = Math.floor(Math.random() * Math.min(data.results.length, 5));
+            const imageUrl = data.results[randomIndex].urls.regular;
+            imageCache[query] = imageUrl;
+            return imageUrl;
+        } else {
+            throw new Error('No relevant images found');
+        }
     } catch (error) {
         console.error('Error fetching image from Unsplash:', error);
         // Fallback placeholder image if API rate limit hits
