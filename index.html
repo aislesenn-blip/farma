@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FARMA - Digital Agriculture Platform</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Map JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Desktop Sidebar (Hidden on Mobile) -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-leaf"></i> FARMA
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-target="dashboard"><i class="fa-solid fa-house"></i> Dashboard</li>
+                <li data-target="land-market"><i class="fa-solid fa-map-location-dot"></i> Land Market</li>
+                <li data-target="weather"><i class="fa-solid fa-cloud-sun-rain"></i> Weather</li>
+                <li data-target="ai-crop"><i class="fa-solid fa-microchip"></i> AI Crop</li>
+                <li data-target="input-market"><i class="fa-solid fa-seedling"></i> Inputs</li>
+                <li data-target="equipment"><i class="fa-solid fa-tractor"></i> Equipment</li>
+                <li data-target="crop-market"><i class="fa-solid fa-wheat-awn"></i> Crop Market</li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="user-profile">
+                    <img src="https://i.pravatar.cc/150?img=11" alt="User Profile" class="avatar">
+                    <span class="greeting">Hello, John</span>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+                    <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
+                </div>
+            </header>
+
+            <!-- Module Containers -->
+            <div class="module-container active" id="dashboard">
+                <h1 class="page-title">Dashboard</h1>
+
+                <div class="dashboard-grid">
+                    <!-- Overview Cards -->
+                    <div class="card glass stats-card">
+                        <div class="stats-icon bg-green"><i class="fa-solid fa-seedling"></i></div>
+                        <div class="stats-info">
+                            <span class="stats-label">Active Farms</span>
+                            <span class="stats-value">3</span>
+                        </div>
+                    </div>
+
+                    <div class="card glass stats-card">
+                        <div class="stats-icon bg-yellow"><i class="fa-solid fa-temperature-half"></i></div>
+                        <div class="stats-info">
+                            <span class="stats-label">Avg Soil Health</span>
+                            <span class="stats-value">84%</span>
+                        </div>
+                    </div>
+
+                    <div class="card glass stats-card">
+                        <div class="stats-icon bg-blue"><i class="fa-solid fa-cloud-rain"></i></div>
+                        <div class="stats-info">
+                            <span class="stats-label">Rainfall (This Week)</span>
+                            <span class="stats-value">12mm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-sections">
+                    <div class="section-card glass">
+                        <h2><i class="fa-solid fa-bolt"></i> Recommended Actions</h2>
+                        <ul class="action-list">
+                            <li>
+                                <div class="action-icon alert-warning"><i class="fa-solid fa-droplet-slash"></i></div>
+                                <div class="action-text">
+                                    <strong>Irrigation needed</strong>
+                                    <span>Farm A (Maize) soil moisture is low (22%)</span>
+                                </div>
+                                <button class="btn-primary btn-sm">Act</button>
+                            </li>
+                            <li>
+                                <div class="action-icon alert-success"><i class="fa-solid fa-leaf"></i></div>
+                                <div class="action-text">
+                                    <strong>Optimal Planting Window</strong>
+                                    <span>Next 3 days are ideal for Soybeans</span>
+                                </div>
+                                <button class="btn-primary btn-sm">View</button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="section-card glass">
+                        <h2><i class="fa-solid fa-chart-line"></i> Market Overview</h2>
+                        <div class="chart-container">
+                            <canvas id="dashboardMarketChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module-container" id="land-market">
+                <div class="flex-header">
+                    <h1 class="page-title">Land Marketplace</h1>
+                    <button class="btn-icon" onclick="toggleMap()"><i class="fa-solid fa-map"></i> View Map</button>
+                </div>
+
+                <div class="filters-bar glass">
+                    <select class="filter-select" id="filter-location"><option value="">Location</option><option value="Arusha">Arusha</option><option value="Dodoma">Dodoma</option><option value="Moshi">Moshi</option></select>
+                    <select class="filter-select" id="filter-size"><option value="">Size</option><option value="small">&lt; 15 ha</option><option value="large">&gt;= 15 ha</option></select>
+                    <select class="filter-select" id="filter-soil"><option value="">Soil Type</option><option value="Loam">Loam</option><option value="Sandy">Sandy</option><option value="Clay">Clay</option></select>
+                </div>
+
+                <div class="map-container" id="farm-map" style="display: none; height: 400px; width: 100%; border-radius: var(--border-radius-md); margin-bottom: 24px; box-shadow: var(--shadow-md);">
+                    <!-- Leaflet map goes here -->
+                </div>
+
+                <div class="farm-grid" id="farm-listings">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <div class="module-container" id="weather">
+                <h1 class="page-title">Weather Intelligence</h1>
+
+                <div class="weather-hero card glass">
+                    <div class="weather-main">
+                        <div class="weather-temp">
+                            <i class="fa-solid fa-cloud-sun fa-3x" style="color: var(--secondary-color)"></i>
+                            <span class="temp-val">28°C</span>
+                        </div>
+                        <div class="weather-loc">
+                            <h2>Arusha, Tanzania</h2>
+                            <p>Partly Cloudy • Humidity 62%</p>
+                        </div>
+                    </div>
+                    <div class="weather-alerts">
+                        <div class="alert-box alert-warning">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Moderate drought warning next 14 days.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-sections mt-4">
+                    <div class="section-card glass">
+                        <h2><i class="fa-solid fa-calendar-days"></i> 7-Day Forecast</h2>
+                        <div class="forecast-list" id="forecast-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="section-card glass">
+                        <h2><i class="fa-solid fa-droplet"></i> Rainfall vs Soil Moisture</h2>
+                        <div class="chart-container">
+                            <canvas id="weatherChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module-container" id="ai-crop">
+                <h1 class="page-title">AI Crop Recommendation</h1>
+
+                <div class="ai-input-section card glass mb-4">
+                    <h2>Select Farm for Analysis</h2>
+                    <select class="filter-select w-100 mt-2" id="ai-farm-select">
+                        <option>Farm A - Arusha (15 ha, Loam)</option>
+                        <option>Farm B - Dodoma (8 ha, Sandy)</option>
+                    </select>
+                    <button class="btn-primary mt-3 w-100" onclick="simulateAI()">Run AI Analysis</button>
+                </div>
+
+                <div class="ai-results" id="ai-results" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="card glass text-center p-4">
+                            <i class="fa-solid fa-wheat-awn fa-3x mb-2" style="color: var(--secondary-color)"></i>
+                            <h3>Top Crop</h3>
+                            <p class="stats-value">Soybeans</p>
+                            <span class="badge bg-green text-white">92% Match</span>
+                        </div>
+                        <div class="card glass text-center p-4">
+                            <i class="fa-solid fa-chart-pie fa-3x mb-2" style="color: var(--primary-color)"></i>
+                            <h3>Expected Yield</h3>
+                            <p class="stats-value">3.2 - 3.8</p>
+                            <p>Tons / Hectare</p>
+                        </div>
+                        <div class="card glass text-center p-4">
+                            <i class="fa-solid fa-calendar-check fa-3x mb-2" style="color: var(--accent-color)"></i>
+                            <h3>Planting Window</h3>
+                            <p class="stats-value">Oct 15 - 28</p>
+                            <p>Optimal timing</p>
+                        </div>
+                    </div>
+
+                    <div class="section-card glass mt-4">
+                        <h2><i class="fa-solid fa-vial"></i> Soil Analysis & Strategy</h2>
+                        <div class="chart-container">
+                            <canvas id="soilChart"></canvas>
+                        </div>
+                        <p class="mt-3 text-secondary"><strong>Recommendation:</strong> Apply NPK fertilizer at planting. Soil nitrogen is slightly below optimal levels for soybeans. Consider crop rotation with maize next season.</p>
+                    </div>
+                </div>
+
+                <!-- Loading Skeleton -->
+                <div class="ai-loading text-center p-5" id="ai-loading" style="display: none;">
+                    <i class="fa-solid fa-microchip fa-spin fa-4x" style="color: var(--primary-color)"></i>
+                    <h3 class="mt-3">Analyzing soil data, weather patterns, and historical yields...</h3>
+                </div>
+            </div>
+
+            <div class="module-container" id="input-market">
+                <div class="flex-header">
+                    <h1 class="page-title">Input Marketplace</h1>
+                    <button class="btn-icon"><i class="fa-solid fa-cart-shopping"></i> Cart (0)</button>
+                </div>
+
+                <div class="filters-bar glass">
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">Seeds</button>
+                    <button class="filter-btn">Fertilizers</button>
+                    <button class="filter-btn">Pesticides</button>
+                    <button class="filter-btn">Irrigation</button>
+                </div>
+
+                <div class="product-grid" id="input-products">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <div class="module-container" id="equipment">
+                <div class="flex-header">
+                    <h1 class="page-title">Equipment Rental</h1>
+                    <button class="btn-icon"><i class="fa-solid fa-location-crosshairs"></i> Near Me</button>
+                </div>
+
+                <div class="filters-bar glass">
+                    <button class="filter-btn active">All</button>
+                    <button class="filter-btn">Tractors</button>
+                    <button class="filter-btn">Harvesters</button>
+                    <button class="filter-btn">Planters</button>
+                </div>
+
+                <div class="product-grid" id="equipment-listings">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <div class="module-container" id="crop-market">
+                <h1 class="page-title">Crop Marketplace</h1>
+
+                <div class="dashboard-grid">
+                    <div class="card glass p-4 text-center">
+                        <i class="fa-solid fa-arrow-trend-up fa-2x mb-2" style="color: var(--primary-color)"></i>
+                        <h3>Maize Demand</h3>
+                        <p class="stats-value text-green">High</p>
+                        <p class="text-secondary">+12% this week</p>
+                    </div>
+                    <div class="card glass p-4 text-center">
+                        <i class="fa-solid fa-scale-balanced fa-2x mb-2" style="color: var(--secondary-color)"></i>
+                        <h3>Soybean Price</h3>
+                        <p class="stats-value">$420/T</p>
+                        <p class="text-secondary">Stable</p>
+                    </div>
+                    <div class="card glass p-4 text-center">
+                        <i class="fa-solid fa-handshake fa-2x mb-2" style="color: var(--accent-color)"></i>
+                        <h3>Active Buyers</h3>
+                        <p class="stats-value">24</p>
+                        <p class="text-secondary">Looking for contracts</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-sections mt-4">
+                    <div class="section-card glass">
+                        <h2><i class="fa-solid fa-chart-line"></i> Market Price Trends</h2>
+                        <div class="chart-container">
+                            <canvas id="cropMarketChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="section-card glass">
+                        <h2><i class="fa-solid fa-users"></i> Buyer Requests</h2>
+                        <ul class="action-list" id="buyer-requests">
+                            <!-- Dynamically populated -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Mobile Bottom Navigation (Visible on Mobile) -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-target="dashboard"><i class="fa-solid fa-house"></i></div>
+            <div class="nav-item" data-target="land-market"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div class="nav-item" data-target="weather"><i class="fa-solid fa-cloud-sun-rain"></i></div>
+            <div class="nav-item" data-target="ai-crop"><i class="fa-solid fa-microchip"></i></div>
+            <div class="nav-item menu-toggle"><i class="fa-solid fa-bars"></i></div>
+        </nav>
+
+        <!-- Mobile Extended Menu -->
+        <div class="mobile-menu">
+            <div class="menu-item" data-target="input-market"><i class="fa-solid fa-seedling"></i> Inputs</div>
+            <div class="menu-item" data-target="equipment"><i class="fa-solid fa-tractor"></i> Equipment</div>
+            <div class="menu-item" data-target="crop-market"><i class="fa-solid fa-wheat-awn"></i> Crop Market</div>
+        </div>
+
+        <!-- Farm Detail Modal -->
+        <div class="modal-overlay" id="farm-modal" style="display: none;">
+            <div class="modal-content glass">
+                <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+                <div class="modal-body" id="modal-body">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
