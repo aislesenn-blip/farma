@@ -564,7 +564,7 @@ function populateBuyers() {
             </div>
             <div class="buyer-action">
                 <span class="buyer-price">${buyer.price}</span>
-                <button class="btn-primary btn-sm" onclick="openChat('${buyer.name}', '${buyer.logo}')">Contact</button>
+                <button class="btn-primary btn-sm" onclick="openChat('${buyer.id}')">Contact</button>
             </div>
         `;
         container.appendChild(li);
@@ -588,97 +588,6 @@ function populateWeather() {
         `;
         container.appendChild(div);
     });
-}
-
-// --- CHAT SYSTEM LOGIC ---
-window.openChat = function(name, logo) {
-    document.getElementById('chat-buyer-name').textContent = name;
-    document.getElementById('chat-buyer-logo').textContent = logo;
-
-    const messages = document.getElementById('chat-messages');
-    messages.innerHTML = `
-        <div class="chat-message received">
-            Hello! We are currently looking for new contracts for this season. Do you have any estimated volume?
-        </div>
-    `;
-
-    document.getElementById('chat-modal').style.display = 'flex';
-}
-
-window.closeChat = function() {
-    document.getElementById('chat-modal').style.display = 'none';
-}
-
-window.sendMessage = function() {
-    const input = document.getElementById('chat-input');
-    const text = input.value.trim();
-    if (!text) return;
-
-    const messages = document.getElementById('chat-messages');
-
-    // Add sent message
-    const sentMsg = document.createElement('div');
-    sentMsg.className = 'chat-message sent';
-    sentMsg.textContent = text;
-    messages.appendChild(sentMsg);
-
-    input.value = '';
-    messages.scrollTop = messages.scrollHeight;
-
-    // Simulate reply
-    setTimeout(() => {
-        const replyMsg = document.createElement('div');
-        replyMsg.className = 'chat-message received';
-        replyMsg.textContent = "Thank you for the update. Let's arrange a formal agreement.";
-        messages.appendChild(replyMsg);
-        messages.scrollTop = messages.scrollHeight;
-    }, 1500);
-}
-
-// --- AI SCANNER LOGIC ---
-window.openScanner = async function() {
-    document.getElementById('scanner-modal').style.display = 'flex';
-    document.getElementById('scanner-result').classList.remove('show');
-    document.querySelector('.scanner-header h3').textContent = 'Scanning Plant...';
-
-    // Simulate camera feed by fetching a sick plant image
-    const feedImg = document.getElementById('scanner-feed');
-    feedImg.src = await fetchImage('crop disease leaf rust');
-
-    // Simulate scan delay
-    setTimeout(() => {
-        document.querySelector('.scanner-header h3').textContent = 'Analysis Complete';
-        document.getElementById('scanner-result').style.visibility = 'visible';
-        document.getElementById('scanner-result').classList.add('show');
-    }, 2500);
-}
-
-window.closeScanner = function() {
-    document.getElementById('scanner-modal').style.display = 'none';
-}
-
-window.applyScannerRecommendation = function() {
-    closeScanner();
-
-    // Switch to input market
-    const targetId = 'input-market';
-    document.querySelectorAll('.nav-links li').forEach(nav => nav.classList.remove('active'));
-    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
-    document.querySelectorAll(`[data-target="${targetId}"]`).forEach(nav => nav.classList.add('active'));
-
-    document.querySelectorAll('.module-container').forEach(mod => {
-        mod.classList.remove('active');
-        if (mod.id === targetId) {
-            mod.classList.add('active');
-        }
-    });
-
-    // Auto-filter pesticides
-    const inputButtons = document.querySelectorAll('#input-market .filter-btn');
-    inputButtons.forEach(b => b.classList.remove('active'));
-    Array.from(inputButtons).find(b => b.textContent === 'Pesticides').classList.add('active');
-
-    populateProducts(mockProducts.filter(p => p.category === 'Pesticides'));
 }
 
 // --- CHARTS LOGIC ---
