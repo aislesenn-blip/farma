@@ -218,6 +218,36 @@ function initFilters() {
     });
 }
 
+// --- SPLASH SCREEN & ONBOARDING ---
+async function initSplashScreen() {
+    const splashBg = document.getElementById('splash-bg');
+    if (splashBg) {
+        // Fetch a high-quality agriculture landscape image
+        const imageUrl = await fetchImage('african agriculture landscape farm aerial');
+        splashBg.style.backgroundImage = `url('${imageUrl}')`;
+    }
+}
+
+window.selectRole = function(role) {
+    const splashScreen = document.getElementById('splash-screen');
+    if (splashScreen) {
+        splashScreen.style.opacity = '0';
+        setTimeout(() => {
+            splashScreen.style.display = 'none';
+            // If buyer, navigate to crop market by default
+            if (role === 'buyer') {
+                document.querySelector('[data-target="crop-market"]').click();
+            }
+
+            // Check if it's the first time the user opens the platform to run onboarding tour
+            if(!localStorage.getItem('farma_tour_completed')) {
+                startTour();
+                localStorage.setItem('farma_tour_completed', 'true');
+            }
+        }, 500); // Wait for opacity transition
+    }
+};
+
 // --- MICRO-INTERACTIONS ---
 function createRipple(event) {
     const button = event.currentTarget;
@@ -534,7 +564,7 @@ function populateBuyers() {
             </div>
             <div class="buyer-action">
                 <span class="buyer-price">${buyer.price}</span>
-                <button class="btn-primary btn-sm">Contact</button>
+                <button class="btn-primary btn-sm" onclick="openChat('${buyer.id}')">Contact</button>
             </div>
         `;
         container.appendChild(li);
@@ -858,6 +888,142 @@ window.simulateAI = function() {
     }, 2500);
 }
 
+// --- DISEASE SCANNER LOGIC ---
+window.startDiseaseScan = async function() {
+    const btn = document.getElementById('btn-scan');
+    const scanImage = document.getElementById('scan-image');
+    const scanLaser = document.getElementById('scan-laser');
+    const uploadPrompt = document.getElementById('upload-prompt');
+    const loading = document.getElementById('scanner-loading');
+    const results = document.getElementById('scanner-results');
+
+    // 1. "Upload" Image Simulation
+    uploadPrompt.style.display = 'none';
+    const imageUrl = await fetchImage('diseased maize leaf crop damage');
+    scanImage.src = imageUrl;
+    scanImage.style.display = 'block';
+
+    // 2. Start Scan Animation
+    btn.disabled = true;
+    btn.innerHTML = 'Scanning...';
+    scanLaser.style.display = 'block';
+    results.style.display = 'none';
+
+    // 3. Processing State
+    setTimeout(() => {
+        scanLaser.style.display = 'none';
+        document.querySelector('.scanner-container').style.display = 'none';
+        loading.style.display = 'block';
+
+        // 4. Reveal Results
+        setTimeout(() => {
+            loading.style.display = 'none';
+            document.querySelector('.scanner-container').style.display = 'block';
+            scanImage.style.display = 'none';
+            uploadPrompt.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = 'Scan Another Leaf';
+
+            results.style.display = 'block';
+        }, 2000); // 2 sec processing
+    }, 2500); // 2.5 sec scanning
+};
+
+window.navigateToInputs = function() {
+    // Switch to inputs market
+    document.querySelectorAll('.nav-links li').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll(`[data-target="input-market"]`).forEach(nav => nav.classList.add('active'));
+
+    document.querySelectorAll('.module-container').forEach(mod => {
+        mod.classList.remove('active');
+        if (mod.id === 'input-market') {
+            mod.classList.add('active');
+        }
+    });
+
+    // Auto-select Pesticides filter
+    const inputButtons = document.querySelectorAll('#input-market .filter-btn');
+    inputButtons.forEach(btn => {
+        if(btn.innerText === 'Pesticides') {
+            btn.click(); // Trigger click logic to filter
+        }
+    });
+};
+
+// --- CHAT LOGIC ---
+window.openChat = function(buyerId) {
+    // The ID might be passed as a string or number depending on how the button is rendered.
+    const numericId = parseInt(buyerId, 10);
+    const buyer = mockBuyers.find(b => b.id === numericId || b.id === buyerId);
+    if (!buyer) return;
+
+    // Switch to messages module
+    document.querySelectorAll('.nav-links li').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
+    document.querySelectorAll(`[data-target="messages"]`).forEach(nav => nav.classList.add('active'));
+
+    document.querySelectorAll('.module-container').forEach(mod => {
+        mod.classList.remove('active');
+        if (mod.id === 'messages') {
+            mod.classList.add('active');
+        }
+    });
+
+    // Update active chat UI
+    document.getElementById('active-chat-logo').innerText = buyer.logo;
+    document.getElementById('active-chat-name').innerText = buyer.name;
+
+    // If on mobile, slide in the chat window
+    const sidebar = document.getElementById('chat-sidebar');
+    if (window.innerWidth < 768) {
+        sidebar.classList.add('hide-mobile');
+    }
+};
+
+window.toggleChatList = function() {
+    const sidebar = document.getElementById('chat-sidebar');
+    sidebar.classList.remove('hide-mobile');
+};
+
+window.sendMessage = function() {
+    const input = document.getElementById('chat-input-field');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const messagesContainer = document.getElementById('chat-messages');
+
+    // Add sent message
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    messagesContainer.innerHTML += `
+        <div class="message msg-sent">
+            <div class="msg-bubble">${msg}</div>
+            <div class="msg-time">${timeStr} <i class="fa-solid fa-check text-green"></i></div>
+        </div>
+    `;
+
+    input.value = '';
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    // Simulate reply after 1.5 seconds
+    setTimeout(() => {
+        messagesContainer.innerHTML += `
+            <div class="message msg-received">
+                <div class="msg-bubble">I received your message. Let me check with my team and get back to you shortly.</div>
+                <div class="msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+        `;
+        // Update checkmarks on previous sent messages to double checks
+        document.querySelectorAll('.msg-sent .fa-check').forEach(icon => {
+            icon.classList.remove('fa-check');
+            icon.classList.add('fa-check-double');
+        });
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 1500);
+};
+
 // --- ONBOARDING TOUR ---
 function startTour() {
     const driver = window.driver.js.driver;
@@ -931,14 +1097,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initRipples();
     animateCounters();
 
-    // Check if it's the first time the user opens the platform to run onboarding tour
-    // Note: navigator.webdriver check removed to allow automated visual verification of the tour
-    if(!localStorage.getItem('farma_tour_completed')) {
-        setTimeout(() => {
-            startTour();
-            localStorage.setItem('farma_tour_completed', 'true');
-        }, 1500);
-    }
+    // Init Splash Screen
+    initSplashScreen();
 
     console.log('FARMA Platform Initialized');
 });
