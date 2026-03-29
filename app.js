@@ -19,14 +19,14 @@ const mockFarms = Array.from({ length: 32 }, (_, i) => {
         id: i + 1,
         name: `Farm Plot #${1000 + i} ${loc.name}`,
         location: loc.name,
-        lat: loc.lat + (Math.random() - 0.5) * 1.5, // Add some jitter for map
+        lat: loc.lat + (Math.random() - 0.5) * 1.5,
         lng: loc.lng + (Math.random() - 0.5) * 1.5,
         size: Math.floor(Math.random() * 50) + 5,
         soil: soils[Math.floor(Math.random() * soils.length)],
         water: waters[Math.floor(Math.random() * waters.length)],
         price: Math.floor(Math.random() * 2000) + 500,
         score: Math.floor(Math.random() * 30) + 70,
-        imageQuery: ["farmland field", "rural crop landscape", "farming land", "agricultural field harvest", "soil farming", "green pasture farming"][i % 6] + " " + (i%3) // Highly specific, ensures variety
+        imageQuery: ["farmland field", "rural crop landscape", "farming land", "agricultural field harvest", "soil farming", "green pasture farming"][i % 6] + " " + (i%3)
     };
 });
 
@@ -79,15 +79,12 @@ async function fetchImage(query) {
     }
 
     try {
-        // Enforce strict query relevancy by adding a general topic and querying for photos directly rather than truly random
-        // Random endpoint often pulls irrelevant photos if the exact tag isn't heavily saturated
         const strictQuery = `${query} agriculture farm`.trim();
         const response = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(strictQuery)}&client_id=${UNSPLASH_ACCESS_KEY}&orientation=landscape&per_page=10`);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
 
         if (data.results && data.results.length > 0) {
-            // Pick a random image from the top relevant results
             const randomIndex = Math.floor(Math.random() * Math.min(data.results.length, 5));
             const imageUrl = data.results[randomIndex].urls.regular;
             imageCache[query] = imageUrl;
@@ -97,7 +94,6 @@ async function fetchImage(query) {
         }
     } catch (error) {
         console.error('Error fetching image from Unsplash:', error);
-        // Fallback placeholder image if API rate limit hits
         const placeholder = `https://picsum.photos/seed/${encodeURIComponent(query)}/800/600`;
         imageCache[query] = placeholder;
         return placeholder;
@@ -118,13 +114,11 @@ function toggleMap() {
         btnIcon.innerHTML = '<i class="fa-solid fa-table-cells-large"></i> View Grid';
 
         if (!map) {
-            // Initialize map (centered roughly on Tanzania)
             map = L.map('farm-map').setView([-6.3690, 34.8888], 5);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            // Add mock markers
             mockFarms.forEach(farm => {
                 if (farm.lat && farm.lng) {
                     L.marker([farm.lat, farm.lng]).addTo(map)
@@ -132,19 +126,16 @@ function toggleMap() {
                 }
             });
         }
-
-        // Force Leaflet to recalculate size after displaying
         setTimeout(() => map.invalidateSize(), 100);
     } else {
         mapContainer.style.display = 'none';
-        gridContainer.style.display = 'grid';
+        gridContainer.style.display = 'flex'; // Changed to flex for mobile grid
         btnIcon.innerHTML = '<i class="fa-solid fa-map"></i> View Map';
     }
 }
 
 // --- FILTER LOGIC ---
 function initFilters() {
-    // Farm Filters
     const farmFilters = ['filter-location', 'filter-size', 'filter-soil'];
     farmFilters.forEach(id => {
         const el = document.getElementById(id);
@@ -165,7 +156,6 @@ function initFilters() {
 
                 populateFarms(filtered);
 
-                // update map markers if map exists
                 if(map) {
                     map.eachLayer(layer => {
                         if (layer instanceof L.Marker) {
@@ -183,7 +173,6 @@ function initFilters() {
         }
     });
 
-    // Product Filters
     const inputButtons = document.querySelectorAll('#input-market .filter-btn');
     inputButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -200,7 +189,6 @@ function initFilters() {
         });
     });
 
-    // Equipment Filters
     const equipButtons = document.querySelectorAll('#equipment .filter-btn');
     equipButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -222,7 +210,6 @@ function initFilters() {
 async function initSplashScreen() {
     const splashBg = document.getElementById('splash-bg');
     if (splashBg) {
-        // Fetch a high-quality agriculture landscape image
         const imageUrl = await fetchImage('african agriculture landscape farm aerial');
         splashBg.style.backgroundImage = `url('${imageUrl}')`;
     }
@@ -234,17 +221,15 @@ window.selectRole = function(role) {
         splashScreen.style.opacity = '0';
         setTimeout(() => {
             splashScreen.style.display = 'none';
-            // If buyer, navigate to crop market by default
             if (role === 'buyer') {
                 document.querySelector('[data-target="crop-market"]').click();
             }
 
-            // Check if it's the first time the user opens the platform to run onboarding tour
             if(!localStorage.getItem('farma_tour_completed')) {
                 startTour();
                 localStorage.setItem('farma_tour_completed', 'true');
             }
-        }, 500); // Wait for opacity transition
+        }, 500);
     }
 };
 
@@ -278,7 +263,6 @@ function initRipples() {
 function animateCounters() {
     const counters = document.querySelectorAll('.stats-value');
 
-    // Simple intersection observer to trigger animation when visible
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -286,7 +270,6 @@ function animateCounters() {
                 if(el.dataset.animated) return;
 
                 const text = el.innerText;
-                // Only animate if it looks like a clean number (ignoring $, %, /T for now via basic regex)
                 const numMatch = text.match(/^([\D]*)([\d,.]+)([\D]*)$/);
 
                 if(numMatch && !text.includes('-')) {
@@ -303,10 +286,9 @@ function animateCounters() {
                         const timer = setInterval(() => {
                             start += increment;
                             if (start >= target) {
-                                el.innerText = text; // restore original exactly
+                                el.innerText = text;
                                 clearInterval(timer);
                             } else {
-                                // Format to 1 decimal if target has decimal, else integer
                                 const displayNum = target % 1 !== 0 ? start.toFixed(1) : Math.floor(start);
                                 el.innerText = `${prefix}${displayNum}${suffix}`;
                             }
@@ -329,14 +311,12 @@ function initNavigation() {
     const menuToggle = document.querySelector('.menu-toggle');
     const mobileMenu = document.querySelector('.mobile-menu');
 
-    // Toggle mobile extended menu
     if (menuToggle) {
         menuToggle.addEventListener('click', () => {
             mobileMenu.classList.add('show');
         });
     }
 
-    // Close extended menu
     const menuClose = document.querySelector('.menu-close');
     if(menuClose) {
         menuClose.addEventListener('click', () => {
@@ -344,38 +324,34 @@ function initNavigation() {
         });
     }
 
-    // Handle navigation clicks
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const targetId = item.getAttribute('data-target');
             if (!targetId) return;
 
-            // Update active state on nav items
             document.querySelectorAll('.nav-links li').forEach(nav => nav.classList.remove('active'));
             document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
 
-            // Set active on matching desktop and mobile navs
             document.querySelectorAll(`[data-target="${targetId}"]`).forEach(nav => {
-                if(!nav.classList.contains('menu-item')) { // don't highlight extended menu items
+                if(!nav.classList.contains('menu-item')) {
                     nav.classList.add('active');
                 }
             });
 
-            // Hide all modules, show target
             modules.forEach(mod => {
                 mod.classList.remove('active');
                 if (mod.id === targetId) {
                     mod.classList.add('active');
-                    // Re-render charts if needed (Chart.js can be glitchy when hidden)
                     window.dispatchEvent(new Event('resize'));
                 }
             });
 
-            // Close mobile menu if open
             if (mobileMenu && mobileMenu.classList.contains('show')) {
                 mobileMenu.classList.remove('show');
                 menuToggle.classList.remove('active');
             }
+            // Ensure scroll is at top when changing modules
+            window.scrollTo(0,0);
         });
     });
 }
@@ -440,26 +416,26 @@ async function openFarmModal(farmId) {
             <div class="dashboard-grid">
                 <div class="card glass p-4 text-center">
                     <h4 style="color: var(--text-secondary); font-size: 0.875rem;">Total Area</h4>
-                    <p class="stats-value">${farm.size} Hectares</p>
+                    <p class="stats-value">${farm.size} ha</p>
                 </div>
                 <div class="card glass p-4 text-center">
                     <h4 style="color: var(--text-secondary); font-size: 0.875rem;">Soil Profile</h4>
-                    <p class="stats-value">${farm.soil}</p>
+                    <p class="stats-value" style="font-size: 1.1rem">${farm.soil}</p>
                 </div>
                 <div class="card glass p-4 text-center">
-                    <h4 style="color: var(--text-secondary); font-size: 0.875rem;">Irrigation Access</h4>
-                    <p class="stats-value">${farm.water}</p>
+                    <h4 style="color: var(--text-secondary); font-size: 0.875rem;">Irrigation</h4>
+                    <p class="stats-value" style="font-size: 1.1rem">${farm.water}</p>
                 </div>
             </div>
 
             <div class="mt-4">
                 <h3 style="margin-bottom: 12px;"><i class="fa-solid fa-chart-pie"></i> Historical Yield Potential</h3>
                 <p class="text-secondary">Based on our AI analysis, this farm historically produces exceptional yields for legumes and grain crops due to its rich ${farm.soil} soil composition and ${farm.water.toLowerCase()} water availability.</p>
-                <div class="mt-3 flex-header">
-                    <div class="farm-price" style="font-size: 1.5rem;">$${farm.price} <span>/ season</span></div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-icon" onclick="analyzeFarm(${farm.id})"><i class="fa-solid fa-microchip"></i> AI Analysis</button>
-                        <button class="btn-primary"><i class="fa-solid fa-handshake"></i> Request Lease</button>
+                <div class="mt-3 flex-header" style="flex-wrap: wrap; gap: 10px;">
+                    <div class="farm-price" style="font-size: 1.25rem;">$${farm.price} <span>/ season</span></div>
+                    <div style="display:flex; gap:8px; width: 100%;">
+                        <button class="btn-icon" onclick="analyzeFarm(${farm.id})" style="flex:1; justify-content:center;"><i class="fa-solid fa-microchip"></i> Analysis</button>
+                        <button class="btn-primary" style="flex:1;"><i class="fa-solid fa-handshake"></i> Lease</button>
                     </div>
                 </div>
             </div>
@@ -469,7 +445,6 @@ async function openFarmModal(farmId) {
     modal.style.display = 'flex';
 }
 
-// Attach to window so onclick works
 window.closeModal = function() {
     document.getElementById('farm-modal').style.display = 'none';
 }
@@ -537,7 +512,7 @@ async function populateEquipment(equipmentToRender = mockEquipment) {
 
                 <div class="product-footer">
                     <div class="product-price">$${equip.price} <span>/ ${equip.unit}</span></div>
-                    <button class="btn-primary btn-sm">Rent</button>
+                    <button class="btn-primary btn-sm" style="width:auto; padding: 6px 12px;">Rent</button>
                 </div>
             </div>
         `;
@@ -554,16 +529,19 @@ function populateBuyers() {
     mockBuyers.forEach(buyer => {
         const li = document.createElement('li');
         li.className = 'buyer-card';
+        // Adjust for mobile view to prevent cramped layout
         li.innerHTML = `
-            <div class="buyer-info">
-                <div class="buyer-logo">${buyer.logo}</div>
-                <div class="buyer-details">
-                    <h4>${buyer.name} <span class="badge bg-green text-white" style="margin-left:8px; font-weight:normal;">${buyer.type}</span></h4>
-                    <p>Looking for: <strong>${buyer.lookingFor}</strong></p>
+            <div class="buyer-info" style="flex-direction: column; align-items: flex-start; gap: 8px; flex: 1;">
+                <div style="display:flex; align-items:center; gap: 10px;">
+                    <div class="buyer-logo" style="width:36px; height:36px;">${buyer.logo}</div>
+                    <div class="buyer-details">
+                        <h4 style="font-size: 0.95rem;">${buyer.name} <span class="badge bg-green text-white" style="margin-left:4px; font-weight:normal; font-size: 0.65rem">${buyer.type}</span></h4>
+                    </div>
                 </div>
+                <p style="font-size: 0.8rem; color: var(--text-secondary);">Needs: <strong>${buyer.lookingFor}</strong></p>
             </div>
-            <div class="buyer-action">
-                <span class="buyer-price">${buyer.price}</span>
+            <div class="buyer-action" style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+                <span class="buyer-price" style="font-size: 0.9rem;">${buyer.price}</span>
                 <button class="btn-primary btn-sm" onclick="openChat('${buyer.name}', '${buyer.logo}')">Contact</button>
             </div>
         `;
@@ -611,29 +589,93 @@ window.closeChat = function() {
 
 window.sendMessage = function() {
     const input = document.getElementById('chat-input');
-    const text = input.value.trim();
+    // Also check the main messages module input
+    const inputField = document.getElementById('chat-input-field');
+    
+    // Determine which input was used
+    let activeInput, text, messages;
+    
+    if(document.getElementById('chat-modal').style.display === 'flex') {
+        activeInput = input;
+        messages = document.getElementById('chat-messages');
+    } else {
+        activeInput = inputField;
+        messages = document.querySelectorAll('#chat-messages')[1]; // The second one is in the main layout
+    }
+
+    if(!activeInput) return;
+    text = activeInput.value.trim();
     if (!text) return;
 
-    const messages = document.getElementById('chat-messages');
-
-    // Add sent message
     const sentMsg = document.createElement('div');
-    sentMsg.className = 'chat-message sent';
-    sentMsg.textContent = text;
-    messages.appendChild(sentMsg);
+    sentMsg.className = 'chat-message sent'; // Works for both overlay and main layout now because CSS classes are shared
+    // Handle the main layout specific classes
+    if(activeInput === inputField) {
+        sentMsg.className = 'message msg-sent';
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        sentMsg.innerHTML = `
+            <div class="msg-bubble">${text}</div>
+            <div class="msg-time">${timeStr} <i class="fa-solid fa-check text-green"></i></div>
+        `;
+    } else {
+         sentMsg.textContent = text;
+    }
 
-    input.value = '';
+    messages.appendChild(sentMsg);
+    activeInput.value = '';
     messages.scrollTop = messages.scrollHeight;
 
-    // Simulate reply
     setTimeout(() => {
         const replyMsg = document.createElement('div');
-        replyMsg.className = 'chat-message received';
-        replyMsg.textContent = "Thank you for the update. Let's arrange a formal agreement.";
+        
+        if(activeInput === inputField) {
+             replyMsg.className = 'message msg-received';
+             replyMsg.innerHTML = `
+                <div class="msg-bubble">Thank you. Let's arrange a formal agreement.</div>
+                <div class="msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+             `;
+             document.querySelectorAll('.msg-sent .fa-check').forEach(icon => {
+                icon.classList.remove('fa-check');
+                icon.classList.add('fa-check-double');
+            });
+        } else {
+            replyMsg.className = 'chat-message received';
+            replyMsg.textContent = "Thank you for the update. Let's arrange a formal agreement.";
+        }
+
         messages.appendChild(replyMsg);
         messages.scrollTop = messages.scrollHeight;
     }, 1500);
 }
+
+// Ensure the main messages view handles sidebar toggle on mobile
+window.toggleChatList = function() {
+    const sidebar = document.getElementById('chat-sidebar');
+    sidebar.classList.remove('hide-mobile');
+};
+
+// Also attach openChat logic for the main messages module sidebar clicks
+document.addEventListener('DOMContentLoaded', () => {
+    const chatItems = document.querySelectorAll('.chat-list-item');
+    chatItems.forEach(item => {
+        item.addEventListener('click', function() {
+            chatItems.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            const name = this.querySelector('strong').innerText;
+            const logo = this.querySelector('.buyer-logo').innerText;
+            
+            document.getElementById('active-chat-logo').innerText = logo;
+            document.getElementById('active-chat-name').innerText = name;
+            
+            // Hide sidebar on mobile after selection
+            if(window.innerWidth < 768) {
+                document.getElementById('chat-sidebar').classList.add('hide-mobile');
+            }
+        });
+    });
+});
 
 // --- AI SCANNER LOGIC ---
 window.openScanner = async function() {
@@ -641,11 +683,9 @@ window.openScanner = async function() {
     document.getElementById('scanner-result').classList.remove('show');
     document.querySelector('.scanner-header h3').textContent = 'Scanning Plant...';
 
-    // Simulate camera feed by fetching a sick plant image
     const feedImg = document.getElementById('scanner-feed');
     feedImg.src = await fetchImage('crop disease leaf rust');
 
-    // Simulate scan delay
     setTimeout(() => {
         document.querySelector('.scanner-header h3').textContent = 'Analysis Complete';
         document.getElementById('scanner-result').style.visibility = 'visible';
@@ -660,7 +700,6 @@ window.closeScanner = function() {
 window.applyScannerRecommendation = function() {
     closeScanner();
 
-    // Switch to input market
     const targetId = 'input-market';
     document.querySelectorAll('.nav-links li').forEach(nav => nav.classList.remove('active'));
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
@@ -673,7 +712,6 @@ window.applyScannerRecommendation = function() {
         }
     });
 
-    // Auto-filter pesticides
     const inputButtons = document.querySelectorAll('#input-market .filter-btn');
     inputButtons.forEach(b => b.classList.remove('active'));
     Array.from(inputButtons).find(b => b.textContent === 'Pesticides').classList.add('active');
@@ -690,7 +728,6 @@ const chartColors = {
 };
 
 function initCharts() {
-    // 1. Dashboard Market Chart
     const dashCanvas = document.getElementById('dashboardMarketChart');
     if (dashCanvas) {
         new Chart(dashCanvas, {
@@ -718,7 +755,6 @@ function initCharts() {
         });
     }
 
-    // 2. Weather Chart
     const weatherCanvas = document.getElementById('weatherChart');
     if (weatherCanvas) {
         new Chart(weatherCanvas, {
@@ -753,7 +789,6 @@ function initCharts() {
         });
     }
 
-    // 3. Crop Market Chart
     const cropCanvas = document.getElementById('cropMarketChart');
     if (cropCanvas) {
         new Chart(cropCanvas, {
@@ -791,7 +826,6 @@ function renderSoilChart(farm = null) {
     const canvas = document.getElementById('soilChart');
     if (!canvas || canvas.dataset.rendered === "true") return;
 
-    // Generate slightly dynamic data based on the farm or use defaults
     const seed = farm ? farm.id * 10 : 0;
     const data = [
         Math.max(40, Math.min(100, 65 + (seed % 30))),
@@ -824,7 +858,6 @@ function renderSoilChart(farm = null) {
 }
 
 // --- AI SIMULATION ---
-
 async function updateAIFarmPreview() {
     const select = document.getElementById('ai-farm-select');
     const preview = document.getElementById('ai-farm-preview');
@@ -837,16 +870,15 @@ async function updateAIFarmPreview() {
     const imageUrl = await fetchImage(farm.imageQuery);
 
     preview.innerHTML = `
-        <div class="farm-img-container" style="height: 120px; width: 150px; flex-shrink: 0;">
-            <img src="${imageUrl}" alt="${farm.name}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div class="farm-img-container" style="height: 100px; width: 120px; flex-shrink: 0;">
+            <img src="${imageUrl}" alt="${farm.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--border-radius-sm);">
         </div>
-        <div class="farm-details" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
-            <h3 class="farm-title" style="margin-bottom: 8px;">${farm.name}</h3>
-            <p class="farm-location" style="margin-bottom: 0;"><i class="fa-solid fa-location-dot"></i> ${farm.location} • ${farm.size} ha • ${farm.soil}</p>
+        <div class="farm-details" style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-left: 12px;">
+            <h3 class="farm-title" style="margin-bottom: 4px; font-size: 1rem;">${farm.name}</h3>
+            <p class="farm-location" style="margin-bottom: 0; font-size: 0.8rem;"><i class="fa-solid fa-location-dot"></i> ${farm.location} <br> ${farm.size} ha • ${farm.soil}</p>
         </div>
     `;
 
-    // reset previous results when changing farm
     document.getElementById('ai-results').style.display = 'none';
     document.querySelector('.ai-input-section button').innerHTML = 'Run Deep Neural Analysis';
 }
@@ -863,15 +895,12 @@ function populateAIFarmSelect() {
         select.appendChild(option);
     });
 
-    // Initialize preview with the first option
     if (mockFarms.length > 0) {
         updateAIFarmPreview();
     }
 }
 
-// Global action to route to AI
 window.analyzeFarm = function(farmId) {
-    // Switch tab
     const targetId = 'ai-crop';
     document.querySelectorAll('.nav-links li').forEach(nav => nav.classList.remove('active'));
     document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
@@ -885,10 +914,8 @@ window.analyzeFarm = function(farmId) {
         }
     });
 
-    // Close modal
     window.closeModal();
 
-    // Select the farm in the dropdown
     const select = document.getElementById('ai-farm-select');
     if (select) {
         select.value = farmId;
@@ -896,7 +923,6 @@ window.analyzeFarm = function(farmId) {
     }
 }
 
-// Expose to global scope for the inline onclick handler
 window.simulateAI = function() {
     const select = document.getElementById('ai-farm-select');
     const btn = document.querySelector('.ai-input-section button');
@@ -908,13 +934,11 @@ window.simulateAI = function() {
 
     if (!farm) return;
 
-    // Disable button and show loading
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analyzing...';
     results.style.display = 'none';
     loading.style.display = 'block';
 
-    // Dynamically calculate recommendations based on farm properties
     let recommendedCrop = "Soybeans";
     let matchScore = farm.score;
     let expectedYield = "3.2 - 3.8";
@@ -932,30 +956,28 @@ window.simulateAI = function() {
         expectedYield = "4.5 - 5.5";
     }
 
-    // Simulate API delay
     setTimeout(() => {
         loading.style.display = 'none';
 
-        // Update DOM with dynamic values
         const resultsContainer = document.querySelector('.ai-results .dashboard-grid');
         resultsContainer.innerHTML = `
             <div class="card glass text-center p-4">
                 <i class="fa-solid fa-wheat-awn fa-3x mb-2" style="color: var(--secondary-color)"></i>
-                <h3>Top Crop</h3>
+                <h3 style="font-size: 1.1rem;">Top Crop</h3>
                 <p class="stats-value">${recommendedCrop}</p>
                 <span class="badge bg-green text-white">${matchScore}% Match</span>
             </div>
             <div class="card glass text-center p-4">
                 <i class="fa-solid fa-chart-pie fa-3x mb-2" style="color: var(--primary-color)"></i>
-                <h3>Expected Yield</h3>
+                <h3 style="font-size: 1.1rem;">Expected Yield</h3>
                 <p class="stats-value">${expectedYield}</p>
-                <p>Tons / Hectare</p>
+                <p style="font-size: 0.8rem">Tons / ha</p>
             </div>
             <div class="card glass text-center p-4">
                 <i class="fa-solid fa-calendar-check fa-3x mb-2" style="color: var(--accent-color)"></i>
-                <h3>Planting Window</h3>
-                <p class="stats-value">Oct 15 - 28</p>
-                <p>Optimal timing</p>
+                <h3 style="font-size: 1.1rem;">Planting</h3>
+                <p class="stats-value" style="font-size: 1rem;">Oct 15-28</p>
+                <p style="font-size: 0.8rem">Optimal window</p>
             </div>
         `;
 
@@ -965,11 +987,9 @@ window.simulateAI = function() {
         btn.disabled = false;
         btn.innerHTML = 'Run Analysis Again';
 
-        // Re-render chart with new random-ish data to simulate new farm
         const canvas = document.getElementById('soilChart');
         if (canvas) {
             canvas.dataset.rendered = "false";
-            // destroy old chart instance if it exists to render fresh
             const chartInstance = Chart.getChart(canvas);
             if (chartInstance) {
                 chartInstance.destroy();
@@ -979,7 +999,7 @@ window.simulateAI = function() {
     }, 2500);
 }
 
-// --- DISEASE SCANNER LOGIC ---
+// --- DISEASE SCANNER LOGIC (Main module) ---
 window.startDiseaseScan = async function() {
     const btn = document.getElementById('btn-scan');
     const scanImage = document.getElementById('scan-image');
@@ -988,25 +1008,21 @@ window.startDiseaseScan = async function() {
     const loading = document.getElementById('scanner-loading');
     const results = document.getElementById('scanner-results');
 
-    // 1. "Upload" Image Simulation
     uploadPrompt.style.display = 'none';
     const imageUrl = await fetchImage('diseased maize leaf crop damage');
     scanImage.src = imageUrl;
     scanImage.style.display = 'block';
 
-    // 2. Start Scan Animation
     btn.disabled = true;
     btn.innerHTML = 'Scanning...';
     scanLaser.style.display = 'block';
     results.style.display = 'none';
 
-    // 3. Processing State
     setTimeout(() => {
         scanLaser.style.display = 'none';
         document.querySelector('.scanner-container').style.display = 'none';
         loading.style.display = 'block';
 
-        // 4. Reveal Results
         setTimeout(() => {
             loading.style.display = 'none';
             document.querySelector('.scanner-container').style.display = 'block';
@@ -1016,103 +1032,8 @@ window.startDiseaseScan = async function() {
             btn.innerHTML = 'Scan Another Leaf';
 
             results.style.display = 'block';
-        }, 2000); // 2 sec processing
-    }, 2500); // 2.5 sec scanning
-};
-
-window.navigateToInputs = function() {
-    // Switch to inputs market
-    document.querySelectorAll('.nav-links li').forEach(nav => nav.classList.remove('active'));
-    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
-    document.querySelectorAll(`[data-target="input-market"]`).forEach(nav => nav.classList.add('active'));
-
-    document.querySelectorAll('.module-container').forEach(mod => {
-        mod.classList.remove('active');
-        if (mod.id === 'input-market') {
-            mod.classList.add('active');
-        }
-    });
-
-    // Auto-select Pesticides filter
-    const inputButtons = document.querySelectorAll('#input-market .filter-btn');
-    inputButtons.forEach(btn => {
-        if(btn.innerText === 'Pesticides') {
-            btn.click(); // Trigger click logic to filter
-        }
-    });
-};
-
-// --- CHAT LOGIC ---
-window.openChat = function(buyerId) {
-    // The ID might be passed as a string or number depending on how the button is rendered.
-    const numericId = parseInt(buyerId, 10);
-    const buyer = mockBuyers.find(b => b.id === numericId || b.id === buyerId);
-    if (!buyer) return;
-
-    // Switch to messages module
-    document.querySelectorAll('.nav-links li').forEach(nav => nav.classList.remove('active'));
-    document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
-    document.querySelectorAll(`[data-target="messages"]`).forEach(nav => nav.classList.add('active'));
-
-    document.querySelectorAll('.module-container').forEach(mod => {
-        mod.classList.remove('active');
-        if (mod.id === 'messages') {
-            mod.classList.add('active');
-        }
-    });
-
-    // Update active chat UI
-    document.getElementById('active-chat-logo').innerText = buyer.logo;
-    document.getElementById('active-chat-name').innerText = buyer.name;
-
-    // If on mobile, slide in the chat window
-    const sidebar = document.getElementById('chat-sidebar');
-    if (window.innerWidth < 768) {
-        sidebar.classList.add('hide-mobile');
-    }
-};
-
-window.toggleChatList = function() {
-    const sidebar = document.getElementById('chat-sidebar');
-    sidebar.classList.remove('hide-mobile');
-};
-
-window.sendMessage = function() {
-    const input = document.getElementById('chat-input-field');
-    const msg = input.value.trim();
-    if (!msg) return;
-
-    const messagesContainer = document.getElementById('chat-messages');
-
-    // Add sent message
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    messagesContainer.innerHTML += `
-        <div class="message msg-sent">
-            <div class="msg-bubble">${msg}</div>
-            <div class="msg-time">${timeStr} <i class="fa-solid fa-check text-green"></i></div>
-        </div>
-    `;
-
-    input.value = '';
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-    // Simulate reply after 1.5 seconds
-    setTimeout(() => {
-        messagesContainer.innerHTML += `
-            <div class="message msg-received">
-                <div class="msg-bubble">I received your message. Let me check with my team and get back to you shortly.</div>
-                <div class="msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-            </div>
-        `;
-        // Update checkmarks on previous sent messages to double checks
-        document.querySelectorAll('.msg-sent .fa-check').forEach(icon => {
-            icon.classList.remove('fa-check');
-            icon.classList.add('fa-check-double');
-        });
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }, 1500);
+        }, 2000);
+    }, 2500);
 };
 
 // --- ONBOARDING TOUR ---
@@ -1168,9 +1089,25 @@ function startTour() {
     tourObj.drive();
 }
 
+// Ensure the chat is responsive on load
+function handleResize() {
+    const sidebar = document.getElementById('chat-sidebar');
+    if (window.innerWidth < 768) {
+        // If on mobile and a chat is not actively selected, ensure sidebar is visible
+        if(!document.getElementById('active-chat-name').innerText) {
+             sidebar.classList.remove('hide-mobile');
+        }
+    } else {
+        sidebar.classList.remove('hide-mobile');
+    }
+}
+
+window.addEventListener('resize', handleResize);
+
 // Main application logic
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
+    handleResize();
 
     // Populate Data
     populateFarms();
