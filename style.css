@@ -43,7 +43,6 @@
 
 body {
     font-size: 16px;
-
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
     background-color: var(--bg-color);
@@ -64,9 +63,12 @@ body {
 
 .app-container {
     display: flex;
+    max-width: 100vw;
+    overflow-x: hidden;
     height: 100vh;
-    width: 100%;
-    max-width: var(--max-content-width); /* Centered expansion */
+    width: 100vw;
+    max-width: var(--max-content-width);
+    max-width: 100vw; /* Strict mobile constraint */
     background-color: var(--bg-color);
     overflow: hidden;
     position: relative;
@@ -125,6 +127,9 @@ img, canvas, div, section, main {
 /* Main Content Area */
 .main-content {
     flex: 1;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
@@ -973,6 +978,9 @@ h1, h2, h3, h4, h5, h6 {
 .filters-bar {
     display: flex;
     gap: 8px;
+    width: 100%;
+    max-width: 100vw;
+    padding: 16px;
     padding: 16px 0;
     margin-bottom: 24px;
     overflow-x: auto;
@@ -1444,7 +1452,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Desktop Overrides */
-@media (min-width: 768px) {
+@media (min-width: 1024px) and (orientation: landscape) {
     .dashboard-grid, .product-grid {
         grid-template-columns: repeat(4, 1fr);
     }
